@@ -4,7 +4,21 @@ on:
   push:
 
 jobs:
-  docker:
+  ci-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      -
+        name: image test
+        run: |
+          docker-compose \
+            -f ci\docker-compose.yml \
+            up \
+            --build \
+            --exit-code-from test \
+            test
+ 
+  cd:
     runs-on: ubuntu-latest
     steps:
       -
@@ -30,15 +44,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Image Smoke Test
-        run: |
-          docker-compose \
-            -f ci\docker-compose.yml \
-            up \
-            --build \
-            --exit-code-from test \
-            test
       -
         name: Build and test
         uses: docker/build-push-action@v6
