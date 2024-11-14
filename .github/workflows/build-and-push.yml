@@ -8,6 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/apache-test
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=sha         
+      -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       -
@@ -20,8 +31,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
-        name: Build and push
+        name: Image Smoke Test
+        run: |
+          docker-compose \
+            -f ci\docker-compose.yml \
+            up \
+            --build \
+            --exit-code-from test \
+            test
+      -
+        name: Build and test
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/apache-test:latest
+          tags: ${{ steps.meta.outputs.tags }}
