@@ -21,6 +21,7 @@ jobs:
           # generate Docker tags based on the following events/attributes
           tags: |
             type=sha
+            type=raw,value=latest
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -50,4 +51,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: [ ${{ steps.meta.outputs.tags }}, latest ]
+          tags: ${{ steps.meta.outputs.tags }}
