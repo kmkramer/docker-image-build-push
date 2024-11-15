@@ -7,7 +7,7 @@ env:
   TEST_TAG: ${{ secrets.DOCKERHUB_USERNAME }}/apache-test:ci
 
 jobs:
-  docker:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -45,8 +45,8 @@ jobs:
         run: |
           docker run --rm ${{ env.TEST_TAG }}          
       
-      - name: Build and push
-        needs: ${{ steps.test-image }}
+      - name: publish
+        needs: test-image
         uses: docker/build-push-action@v6
         with:
           push: true
