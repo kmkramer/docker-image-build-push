@@ -43,9 +43,8 @@ jobs:
       
       - name: Test Image
         run: |
-          docker run -rm --expose 8888:80 --name test ${{ env.TEST_TAG }}
+          docker run --rm --expose 8888:80 --name test ${{ env.TEST_TAG }}
           curl http://localhost:8888
-          docker kill test
       
       - name: publish
         uses: docker/build-push-action@v6
