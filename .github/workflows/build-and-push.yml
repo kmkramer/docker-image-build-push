@@ -3,28 +3,13 @@ name: build and push
 on:
   push:
 
+env:
+  TEST_TAG: ${{ secrets.DOCKERHUB_USERNAME }}/apache-test:ci
+
 jobs:
-  test:
+  docker:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: install docker-compose
-        run: |
-          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose -v
-      - name: image test
-        run: |
-          docker-compose \
-            -f ./ci/docker-compose.yml \
-            up \
-            --build \
-            --exit-code-from test \
-            test
- 
-  publish:
-    needs: test
-    runs-on: ubuntu-latest
+
     steps:
       - name: Docker meta
         id: meta
@@ -35,8 +20,8 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/apache-test
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=sha         
-      
+            type=sha
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       
@@ -49,8 +34,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Build and test
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v6
+        with:
+          load: true
+          tags: ${{ env.TEST_TAG }}
+      
+      - name: Test Image
+        id: test-image
+        run: |
+          docker run --rm ${{ env.TEST_TAG }}          
+      
+      - name: Build and push
+        needs: ${{ steps.test-image }}
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: [ ${{ steps.meta.outputs.tags }}, latest ]
