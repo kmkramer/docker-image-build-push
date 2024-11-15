@@ -42,12 +42,10 @@ jobs:
           tags: ${{ env.TEST_TAG }}
       
       - name: Test Image
-        id: test-image
         run: |
           docker run --rm ${{ env.TEST_TAG }}          
       
       - name: publish
-        needs: test-image
         uses: docker/build-push-action@v6
         with:
           push: true
