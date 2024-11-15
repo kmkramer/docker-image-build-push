@@ -43,7 +43,7 @@ jobs:
       
       - name: Test Image
         run: |
-          docker run --rm ${{ env.TEST_TAG }}          
+          docker exec --rm ${{ env.TEST_TAG }} cat /usr/local/apache2/htdocs/index.html
       
       - name: publish
         uses: docker/build-push-action@v6
